@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "name": "NiFi",
+  "version": "1.4.0",
+  "setActiveSymlink": true,
+
+  "depends": "CDH",
+  "replaces": "",
+  "conflicts": "",
+
+  "provides": [
+    "nifi"
+  ],
+
+  "scripts": {
+    "defines": "nifi_env.sh"
+  },
+
+  "users": {
+    "nifi": {
+      "longname": "Apache NiFi",
+      "home": "/var/run/nifi",
+      "shell": "/bin/bash"
+    }
+  }
+}
