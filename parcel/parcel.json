@@ -1,7 +1,6 @@
 {
   "schema_version": 1,
-  "name": "NiFi",
-  "version": "1.4.0",
+  "name": "NIFI",
   "setActiveSymlink": true,
 
   "depends": "CDH",
@@ -16,11 +15,21 @@
     "defines": "nifi_env.sh"
   },
 
+  "packages": [
+  ],
+
+  "components": [
+  ],
+
   "users": {
     "nifi": {
       "longname": "Apache NiFi",
       "home": "/var/run/nifi",
-      "shell": "/bin/bash"
+      "shell": "/bin/bash",
+      "extra_groups": [ ]
     }
-  }
+  },
+
+  "groups": [
+  ]
 }

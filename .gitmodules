@@ -1,0 +1,3 @@
+[submodule "cm_ext"]
+	path = tools/cm_ext
+	url = https://github.com/cloudera/cm_ext.git
