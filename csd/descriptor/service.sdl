@@ -2,7 +2,14 @@
   "name": "NIFI",
   "label": "NiFi",
   "description": "Apache's NiFi service",
-  "version": 0.1.0,
+  "version": "0.1.0",
+
+  "compatibility" : {
+    "cdhVersion" : {
+      "min": "5.7.0",
+      "max": "6"
+    }
+  },
 
   "runAs": {
     "user": "nifi",
@@ -42,7 +49,7 @@
         }
       ],
       "startRunner": {
-        "program": "scripts/nifi.sh",
+        "program": "scripts/control.sh",
         "args": [ "run" ],
         "environmentVariables" : {
           "NIFI_PID_DIR": "/var/run/nifi",
@@ -50,7 +57,7 @@
         }
       }
       "stopRunner": {
-        "program": "scripts/nifi.sh",
+        "program": "scripts/control.sh",
         "args": [ "stop" ],
         "environmentVariables" : {
           "NIFI_PID_DIR": "/var/run/nifi",
