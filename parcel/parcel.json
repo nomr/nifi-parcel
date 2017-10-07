@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "NIFI",
+  "name": "nifi",
   "setActiveSymlink": true,
 
   "depends": "CDH",

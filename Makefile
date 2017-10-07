@@ -1,29 +1,40 @@
 
 VERSION=1.4.0
-BUILD_NUMBER=1
 DISTRO=el7
 
-.INTERMEDIATE: nifi-$(VERSION)-bin.tar.gz
+.INTERMEDIATE: nifi-$(VERSION)-bin.tar.gz nifi16.ico
 .DELETE_ON_ERROR:
 
-NIFI-$(VERSION)-$(BUILD_NUMBER)-$(DISTRO).parcel: NIFI-$(VERSION)-$(BUILD_NUMBER)
-	tar zcvf NIFI-$(VERSION)-$(BUILD_NUMBER)-$(DISTRO).parcel $< --owner root --group=root
+all:
+
+nifi-$(VERSION)-$(DISTRO).parcel: nifi-$(VERSION)-bin.tar.gz nifi-$(VERSION)/meta
+	gunzip nifi-$(VERSION)-bin.tar.gz
+	tar rvf nifi-$(VERSION)-bin.tar --owner root --group=root nifi-$(VERSION)
+	gzip -1 nifi-$(VERSION)-bin.tar
+	mv nifi-$(VERSION)-bin.tar.gz $@
 	java -jar validator.jar -f $@
-	rm -rf $<
+
+nifi-$(VERSION)/meta: parcel validator.jar
+	mkdir -p $@
+	cat parcel/parcel.json | jq ".version=\"$(VERSION)\"" > $@/parcel.json
+	java -jar validator.jar -p $@/parcel.json || (rm -rf $@ && false)
+	cp parcel/nifi_env.sh $@
 
 NIFI-$(VERSION)-$(BUILD_NUMBER): nifi-$(VERSION) validator.jar
-	mkdir -p $@/meta
-	cat parcel/parcel.json | jq ".version=\"$(VERSION)-$(BUILD_NUMBER)\"" > $@/meta/parcel.json
-	cp parcel/nifi_env.sh $@/meta
-	mv nifi-$(VERSION)/lib nifi-$(VERSION)/docs nifi-$(VERSION)/LICENSE nifi-$(VERSION)/NOTICE $@ && rm -rf nifi-$(VERSION)
-	java -jar validator.jar -d $@ || rm -rf $@
+	mv nifi-$(VERSION)/lib nifi-$(VERSION)/docs nifi-$(VERSION)/LICENSE nifi-$(VERSION)/NOTICE $@ 
+
+csd/images/icon.png:
+	convert nifi16.ico $@
+
+# Remote dependencies
+validator.jar:
+	cd tools/cm_ext && mvn install && cd -
+	ln -s tools/cm_ext/validator/target/validator.jar .
 
 nifi-$(VERSION)-bin.tar.gz:
 	wget http://apache.claz.org/nifi/$(VERSION)/nifi-$(VERSION)-bin.tar.gz
 
-nifi-$(VERSION): nifi-$(VERSION)-bin.tar.gz
-	tar -xvf nifi-$(VERSION)-bin.tar.gz
+nifi16.ico:
+	wget https://nifi.apache.org/assets/images/nifi16.ico
 
-validator.jar:
-	cd tools/cm_ext && mvn install && cd -
-	ln -s tools/cm_ext/validator/target/validator.jar .
+

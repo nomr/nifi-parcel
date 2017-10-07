@@ -1,0 +1,38 @@
+{
+  "name": "NIFI",
+  "label": "NiFi",
+  "description": "Apache's NiFi service",
+  "version": 0.1.0,
+
+  "runAs": {
+    "user": "nifi",
+    "group": "nifi",
+    "principal": "nifi"
+  },
+
+  "maxInstances": 1,
+
+  "icon": "images/icon.png"
+
+  "roles": [
+    {
+      "name": "NIFI_SERVER",
+      "label": "NiFi Server",
+      "pluralLabel": "NiFi Servers",
+      "parameters": [
+        {
+          "name": "",
+          "required": "true",
+          "type": "port",
+          "default": 8080
+        }
+      ],
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [ "run" ],
+        "environmentVariables" : {
+        }
+      }
+    }
+  ]
+}
