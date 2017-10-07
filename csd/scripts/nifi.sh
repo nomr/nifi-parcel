@@ -56,39 +56,6 @@ die() {
     exit 1
 }
 
-detectOS() {
-    # OS specific support (must be 'true' or 'false').
-    cygwin=false;
-    aix=false;
-    os400=false;
-    darwin=false;
-    case "$(uname)" in
-        CYGWIN*)
-            cygwin=true
-            ;;
-        AIX*)
-            aix=true
-            ;;
-        OS400*)
-            os400=true
-            ;;
-        Darwin)
-            darwin=true
-            ;;
-    esac
-    # For AIX, set an environment variable
-    if ${aix}; then
-         export LDR_CNTRL=MAXDATA=0xB0000000@DSA
-         echo ${LDR_CNTRL}
-    fi
-    # In addition to those, go around the linux space and query the widely
-    # adopted /etc/os-release to detect linux variants
-    if [ -f /etc/os-release ]
-    then
-        source /etc/os-release
-    fi
-}
-
 unlimitFD() {
     # Use the maximum available, or set MAX_FD != -1 to use that
     if [ "x${MAX_FD}" = "x" ]; then
@@ -156,9 +123,6 @@ locateJava() {
 }
 
 init() {
-    # Determine if there is special OS handling we must perform
-    detectOS
-
     # Unlimit the number of file descriptors if possible
     unlimitFD
 
@@ -166,87 +130,6 @@ init() {
     locateJava "$1"
 }
 
-
-install() {
-    detectOS
-
-    if [ "${darwin}" = "true"  ] || [ "${cygwin}" = "true" ]; then
-        echo 'Installing Apache NiFi as a service is not supported on OS X or Cygwin.'
-        exit 1
-    fi
-
-    SVC_NAME=nifi
-    if [ "x$2" != "x" ] ; then
-        SVC_NAME=$2
-    fi
-
-    # since systemd seems to honour /etc/init.d we don't still create native systemd services
-    # yet...
-    initd_dir='/etc/init.d'
-    SVC_FILE="${initd_dir}/${SVC_NAME}"
-
-    if [ ! -w  "${initd_dir}" ]; then
-        echo "Current user does not have write permissions to ${initd_dir}. Cannot install NiFi as a service."
-        exit 1
-    fi
-
-# Create the init script, overwriting anything currently present
-cat <<SERVICEDESCRIPTOR > ${SVC_FILE}
-#!/bin/sh
-
-#
-#    Licensed to the Apache Software Foundation (ASF) under one or more
-#    contributor license agreements.  See the NOTICE file distributed with
-#    this work for additional information regarding copyright ownership.
-#    The ASF licenses this file to You under the Apache License, Version 2.0
-#    (the "License"); you may not use this file except in compliance with
-#    the License.  You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
-#
-# chkconfig: 2345 20 80
-# description: Apache NiFi is a dataflow system based on the principles of Flow-Based Programming.
-#
-
-# Make use of the configured NIFI_HOME directory and pass service requests to the nifi.sh executable
-NIFI_HOME=${NIFI_HOME}
-bin_dir=\${NIFI_HOME}/bin
-nifi_executable=\${bin_dir}/nifi.sh
-
-\${nifi_executable} "\$@"
-SERVICEDESCRIPTOR
-
-    if [ ! -f "${SVC_FILE}" ]; then
-        echo "Could not create service file ${SVC_FILE}"
-        exit 1
-    fi
-
-    # Provide the user execute access on the file
-    chmod u+x ${SVC_FILE}
-
-
-    # If SLES or OpenSuse...
-    if [ "${ID}" = "opensuse" ] || [ "${ID}" = "sles" ]; then
-        rm -f "/etc/rc.d/rc2.d/S65${SVC_NAME}"
-        ln -s "/etc/init.d/${SVC_NAME}" "/etc/rc.d/rc2.d/S65${SVC_NAME}" || { echo "Could not create link /etc/rc.d/rc2.d/S65${SVC_NAME}"; exit 1; }
-        rm -f "/etc/rc.d/rc2.d/K65${SVC_NAME}"
-        ln -s "/etc/init.d/${SVC_NAME}" "/etc/rc.d/rc2.d/K65${SVC_NAME}" || { echo "Could not create link /etc/rc.d/rc2.d/K65${SVC_NAME}"; exit 1; }
-        echo "Service ${SVC_NAME} installed"
-    # Anything other fallback to the old approach
-    else
-        rm -f "/etc/rc2.d/S65${SVC_NAME}"
-        ln -s "/etc/init.d/${SVC_NAME}" "/etc/rc2.d/S65${SVC_NAME}" || { echo "Could not create link /etc/rc2.d/S65${SVC_NAME}"; exit 1; }
-        rm -f "/etc/rc2.d/K65${SVC_NAME}"
-        ln -s "/etc/init.d/${SVC_NAME}" "/etc/rc2.d/K65${SVC_NAME}" || { echo "Could not create link /etc/rc2.d/K65${SVC_NAME}"; exit 1; }
-        echo "Service ${SVC_NAME} installed"
-    fi
-}
 
 run() {
     BOOTSTRAP_CONF_DIR="${NIFI_HOME}/conf"
@@ -259,34 +142,15 @@ run() {
         unset run_as_user
     fi
 
-    if $cygwin; then
-        if [ -n "${run_as_user}" ]; then
-            echo "The run.as option is not supported in a Cygwin environment. Exiting."
+    if [ -n "${run_as_user}" ]; then
+        if ! id -u "${run_as_user}" >/dev/null 2>&1; then
+            echo "The specified run.as user ${run_as_user} does not exist. Exiting."
             exit 1
-        fi;
-
-        NIFI_HOME=$(cygpath --path --windows "${NIFI_HOME}")
-        NIFI_LOG_DIR=$(cygpath --path --windows "${NIFI_LOG_DIR}")
-        NIFI_PID_DIR=$(cygpath --path --windows "${NIFI_PID_DIR}")
-        BOOTSTRAP_CONF=$(cygpath --path --windows "${BOOTSTRAP_CONF}")
-        BOOTSTRAP_CONF_DIR=$(cygpath --path --windows "${BOOTSTRAP_CONF_DIR}")
-        BOOTSTRAP_LIBS=$(cygpath --path --windows "${BOOTSTRAP_LIBS}")
-        BOOTSTRAP_CLASSPATH="${BOOTSTRAP_CONF_DIR};${BOOTSTRAP_LIBS}"
-        if [ -n "${TOOLS_JAR}" ]; then
-            TOOLS_JAR=$(cygpath --path --windows "${TOOLS_JAR}")
-            BOOTSTRAP_CLASSPATH="${TOOLS_JAR};${BOOTSTRAP_CLASSPATH}"
         fi
-    else
-        if [ -n "${run_as_user}" ]; then
-            if ! id -u "${run_as_user}" >/dev/null 2>&1; then
-                echo "The specified run.as user ${run_as_user} does not exist. Exiting."
-                exit 1
-            fi
-        fi;
-        BOOTSTRAP_CLASSPATH="${BOOTSTRAP_CONF_DIR}:${BOOTSTRAP_LIBS}"
-        if [ -n "${TOOLS_JAR}" ]; then
-            BOOTSTRAP_CLASSPATH="${TOOLS_JAR}:${BOOTSTRAP_CLASSPATH}"
-        fi
+    fi;
+    BOOTSTRAP_CLASSPATH="${BOOTSTRAP_CONF_DIR}:${BOOTSTRAP_LIBS}"
+    if [ -n "${TOOLS_JAR}" ]; then
+        BOOTSTRAP_CLASSPATH="${TOOLS_JAR}:${BOOTSTRAP_CLASSPATH}"
     fi
 
     echo
@@ -339,9 +203,6 @@ main() {
 
 
 case "$1" in
-    install)
-        install "$@"
-        ;;
     start|stop|run|status|dump|env)
         main "$@"
         ;;

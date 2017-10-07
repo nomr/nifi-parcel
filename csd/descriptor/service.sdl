@@ -12,7 +12,21 @@
 
   "maxInstances": 1,
 
-  "icon": "images/icon.png"
+  "icon": "images/icon.png",
+
+  "parcel": {
+    "requiredTags": [
+      "nifi",
+      "zookeeper-plugin"
+    ]
+  },
+
+  "serviceDependencies": [
+    {
+      "name": "ZOOKEEPER",
+      "required": "true"
+    }
+  ],
 
   "roles": [
     {
@@ -28,10 +42,21 @@
         }
       ],
       "startRunner": {
-        "program": "scripts/control.sh",
+        "program": "scripts/nifi.sh",
         "args": [ "run" ],
         "environmentVariables" : {
+          "NIFI_PID_DIR": "/var/run/nifi",
+          "NIFI_LOG_DIR": "/var/log/nifi"
         }
+      }
+      "stopRunner": {
+        "program": "scripts/nifi.sh",
+        "args": [ "stop" ],
+        "environmentVariables" : {
+          "NIFI_PID_DIR": "/var/run/nifi",
+          "NIFI_LOG_DIR": "/var/log/nifi"
+        }
+ 
       }
     }
   ]
