@@ -1,0 +1,9 @@
+*.parcel
+csd/images/icon.png
+
+# Tools
+ghr
+gh-release
+make_manifest.py
+release
+validator.jar
