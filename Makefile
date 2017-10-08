@@ -18,6 +18,7 @@ all: info release
 
 info:
 	@echo 'Parcel version: $(VERSION)'
+	@[ ! -z $(VERSION) ]
 	@echo '  NiFi version: $(NIFI_VERSION)'
 	@echo '  Build number: $(BUILD_NUMBER)'
 	@echo '       Parcels: $(PARCELS)'
