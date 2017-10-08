@@ -4,7 +4,7 @@ CSD_VERSION=0.0.1
 #DISTROS=el6 el7 trusty wheezy
 DISTROS=el7
 
-VERSION:=$(shell git tag | tail -1)
+VERSION:=$(shell git describe --tags | sed -e 's/^v//')
 NIFI_VERSION=$(shell echo $(VERSION) | sed -e 's/-.*$$//')
 BUILD_NUMBER=$(shell echo $(VERSION) | sed -e 's/^.*-//')
 
@@ -28,7 +28,7 @@ clean:
 
 release: release/manifest.json
 
-%/manifest.json: $(foreach PARCEL,$(PARCELS),%/$(PARCEL))
+%/manifest.json: $(foreach PARCEL,$(PARCELS),%/$(PARCEL)) make_manifest.py
 	mkdir -p $(shell dirname $@)
 	python make_manifest.py $(shell dirname $@)
 
