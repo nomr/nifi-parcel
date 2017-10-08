@@ -1,9 +1,13 @@
 language: java
-#addons:
-#  apt:
-#    packages:
-#      - golang
-#      - make
 install: true
 script:
   - make
+deploy:
+  provider: releases
+  api_key:
+    secure: Z/aWVXstaPGU0+tKuJnoKuINPrKW47yFCpwTXxEKizBSz5cVXR8KNk7Nsfk094oX5GveJuDiPtQRVwKhYSJkIlW3CY5jjrAo0RaMEOL5BLIpQDJamFIzl199Jnbk0WvRvKVTpJD8pwnd4hruMR3SaOoUh5gVwpj9zx6ZyKPDdPs4DIYgeM08f6pEtymWPOjkdRMOzRxVUrhdQvD1DvrAq20nZKbhKsdyb1z3RPkLISy2M/7mT38R6NVP0Y8Qbx3kvbWebO2UN9wBAY0g+O3ZpSSw1r4qqJWyj5zcSNEQRiq7VrEXCcMwPUgK4HVCsIiOrSP/DTOjIiJjlnDbAwhMftifL2IcacysqR3OS/NfG6ORSXQkO0Md1LTct1UbbH8a6IOxL8pen1sATsp50oNI2SXYt+BLEXYyMYDgGvg2HG5F4Kh23CPQrVeMB2Vm58wmgoeG4DlrhH7rlq8mXHUYybcgr9qvGIRC47jCM0o++kdkPLLDobredznS6jldALphf8I1fW1yTt4ZuvAMfNBegs+JpAKQx/n97afH0bbBQ82GtDYrO4JzpoiWEvoQ2uuWIY/5FeoPPcBHHTz21BvxUExjIB5U86iiVwNILCkY1LmxtYJQyUybPX9O/SrUW7Ptut++Gak+eru50IVfIZMKXneRIp7EYHaXHCXzMQPa0WI=
+  file_glob: true
+  file: release/*
+  skip_cleanup: true
+  on:
+    tags: true
