@@ -4,6 +4,9 @@ csd/images/icon.png
 # Remote binaries
 nifi-*.tar.gz
 
+# SHA256 SUMS
+*-SHA256
+
 # Tools
 ghr
 gh-release
