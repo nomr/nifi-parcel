@@ -1,6 +1,9 @@
 *.parcel
 csd/images/icon.png
 
+# Remote binaries
+nifi-*.tar.gz
+
 # Tools
 ghr
 gh-release
