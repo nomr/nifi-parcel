@@ -4,9 +4,10 @@ CSD_VERSION=0.0.1
 #DISTROS=el6 el7 trusty wheezy
 DISTROS=el7
 
-VERSION:=$(shell git describe --tags | sed -e 's/^v//')
-NIFI_VERSION=$(shell echo $(VERSION) | sed -e 's/-.*$$//')
-BUILD_NUMBER=$(shell echo $(VERSION) | sed -e 's/^.*-//')
+TAG:=$(shell git describe --tags | sed -e 's/^v//')
+NIFI_VERSION=$(shell echo $(TAG) | sed -e 's/-.*$$//')
+BUILD_NUMBER=$(shell echo $(TAG) | sed -e 's/^.*-//')
+VERSION:=$(NIFI_VERSION)-$(BUILD_NUMBER)
 
 PARCELS=$(foreach DISTRO,$(DISTROS),NIFI-$(VERSION)-$(DISTRO).parcel)
 
@@ -17,18 +18,19 @@ PARCELS=$(foreach DISTRO,$(DISTROS),NIFI-$(VERSION)-$(DISTRO).parcel)
 all: info release
 
 info:
-	@echo 'Parcel version: $(VERSION)'
-	@[ ! -z $(VERSION) ]
+	@echo '       Git Tag: $(TAG)'
+	@[ ! -z $(TAG) ]
 	@echo '  NiFi version: $(NIFI_VERSION)'
 	@echo '  Build number: $(BUILD_NUMBER)'
+	@echo 'Parcel version: $(VERSION)'
 	@echo '       Parcels: $(PARCELS)'
 
 clean:
 	rm -rf release NIFI-$(VERSION) NIFI-$(VERSION).parcel
 
-release: release/manifest.json
+release: $(foreach PARCEL,$(PARCELS),%/$(PARCEL)) release/manifest.json
 
-%/manifest.json: $(foreach PARCEL,$(PARCELS),%/$(PARCEL)) make_manifest.py
+%/manifest.json: make_manifest.py
 	mkdir -p $(shell dirname $@)
 	python make_manifest.py $(shell dirname $@)
 
@@ -69,10 +71,10 @@ gh-release:
 
 validator.jar:
 	cd tools/cm_ext && mvn install && cd -
-	ln -s tools/cm_ext/validator/target/validator.jar .
+	ln tools/cm_ext/validator/target/validator.jar .
 
 make_manifest.py:
-	ln -s tools/cm_ext/make_manifest/make_manifest.py
+	ln tools/cm_ext/make_manifest/make_manifest.py
 
 nifi-$(NIFI_VERSION)-bin.tar.gz: nifi-$(NIFI_VERSION)-bin.tar.gz-SHA256
 	wget http://apache.claz.org/nifi/$(NIFI_VERSION)/nifi-$(NIFI_VERSION)-bin.tar.gz

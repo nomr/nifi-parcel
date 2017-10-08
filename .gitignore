@@ -1,6 +1,9 @@
 *.parcel
 csd/images/icon.png
 
+# Release and intermediates
+release
+NIFI-*
 # Remote binaries
 nifi-*.tar.gz
 
@@ -10,6 +13,5 @@ nifi-*.tar.gz
 # Tools
 ghr
 gh-release
-make_manifest.py
-release
 validator.jar
+make_manifest.py

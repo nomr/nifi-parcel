@@ -1,5 +1,5 @@
 # nifi-cdh
-nifi-cdh is a CDH5.x parcel and CSD for Apache's NiFi system.
+nifi-cdh is a CDH5.x parcel for Apache's NiFi system.
 
 ## Requirements 
 
@@ -11,4 +11,7 @@ nifi-cdh is a CDH5.x parcel and CSD for Apache's NiFi system.
 
 ## Build Instructions
 
-    $ make
+  1. Create a new tag
+  2. Run `make`
+
+## Travis
