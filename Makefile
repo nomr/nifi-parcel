@@ -1,43 +1,55 @@
 
 CSD_VERSION=0.0.1
 
+#DISTROS=el6 el7 trusty wheezy
+DISTROS=el7
+
 VERSION:=$(shell git tag | tail -1)
 NIFI_VERSION=$(shell echo $(VERSION) | sed -e 's/-.*$$//')
 BUILD_NUMBER=$(shell echo $(VERSION) | sed -e 's/^.*-//')
 
-DISTRO=el7
+PARCELS=$(foreach DISTRO,$(DISTROS),NIFI-$(VERSION)-$(DISTRO).parcel)
 
 .INTERMEDIATE: %-SHA256
 .DELETE_ON_ERROR:
 .PHONY: release
 
-all: version release
+all: info release
 
-version:
+info:
 	@echo 'Parcel version: $(VERSION)'
 	@echo '  NiFi version: $(NIFI_VERSION)'
 	@echo '  Build number: $(BUILD_NUMBER)'
+	@echo '       Parcels: $(PARCELS)'
+
+clean:
+	rm -rf release NIFI-$(VERSION) NIFI-$(VERSION).parcel
 
 release: release/manifest.json
 
-release/manifest.json: release/NIFI-$(VERSION)-$(DISTRO).parcel
-	python make_manifest.py release
+%/manifest.json: $(foreach PARCEL,$(PARCELS),%/$(PARCEL))
+	mkdir -p $(shell dirname $@)
+	python make_manifest.py $(shell dirname $@)
 
-release/NIFI-$(VERSION)-%.parcel:  release/NIFI-$(VERSION)/meta
-	tar zcvf $@ --owner root --group=root -C release NIFI-$(VERSION)
+NIFI-$(VERSION)-%.parcel: NIFI-$(VERSION).parcel
+	mkdir -p $(shell dirname $@)
+	ln $< $@
 	java -jar validator.jar -f $@
-	rm -rf release/NIFI-$(VERSION)
 
-release/NIFI-$(VERSION)/meta: meta validator.jar release/NIFI-$(VERSION)
-	mkdir -p $@
+NIFI-$(VERSION).parcel: NIFI-$(VERSION)/meta
+	mkdir -p $(shell dirname $@)
+	tar zcvf $@ --owner root --group=root $(shell dirname $<)
+
+NIFI-$(VERSION)/meta: NIFI-$(VERSION) meta validator.jar 
+	mkdir $@
+	cp meta/nifi_env.sh $@
 	cat meta/parcel.json | jq ".version=\"$(VERSION)\"" > $@/parcel.json
 	java -jar validator.jar -p $@/parcel.json || (rm -rf $@ && false)
-	cp meta/nifi_env.sh $@
 
-release/NIFI-$(VERSION): nifi-$(NIFI_VERSION)-bin.tar.gz
-	mkdir -p release
-	tar -zxvf $< -C release
-	mv release/nifi-$(NIFI_VERSION) $@
+NIFI-$(VERSION): nifi-$(NIFI_VERSION)-bin.tar.gz
+	rm -rf $@
+	tar -zxvf $<
+	mv nifi-$(NIFI_VERSION) $@
 
 
 csd/images/icon.png:
@@ -63,11 +75,12 @@ make_manifest.py:
 
 nifi-$(NIFI_VERSION)-bin.tar.gz: nifi-$(NIFI_VERSION)-bin.tar.gz-SHA256
 	wget http://apache.claz.org/nifi/$(NIFI_VERSION)/nifi-$(NIFI_VERSION)-bin.tar.gz
+	touch $@
 	sha256sum -c $<
 
 nifi16.ico:
 	wget https://nifi.apache.org/assets/images/nifi16.ico
 
 # Auto Rules
-%-SHA256:
+%-SHA256: SHA256SUMS
 	grep $(subst -SHA256,,$@) SHA256SUMS > $@
