@@ -1,9 +1,9 @@
 language: java
-addons:
-  apt:
-    packages:
-      - golang
-      - make
+#addons:
+#  apt:
+#    packages:
+#      - golang
+#      - make
 install: true
 script:
   - make
