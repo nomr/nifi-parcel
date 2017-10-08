@@ -26,7 +26,7 @@ info:
 	@echo '       Parcels: $(PARCELS)'
 
 clean:
-	rm -rf release NIFI-$(VERSION) NIFI-$(VERSION).parcel
+	rm -rf release NIFI-*
 
 release: $(foreach PARCEL,$(PARCELS),release/$(PARCEL)) release/manifest.json
 
@@ -51,7 +51,7 @@ NIFI-$(VERSION)/meta: NIFI-$(VERSION) meta validator.jar
 
 NIFI-$(VERSION): nifi-$(NIFI_VERSION)-bin.tar.gz
 	rm -rf $@
-	tar -zxvf $<
+	tar -zxf $<
 	mv nifi-$(NIFI_VERSION) $@
 
 
@@ -66,11 +66,11 @@ ghr:
 
 gh-release:
 	wget https://github.com/progrium/gh-release/releases/download/v2.2.1/gh-release_2.2.1_linux_x86_64.tgz -O gh-release.tgz
-	tar -xvf gh-release.tgz
+	tar -xf gh-release.tgz
 	rm gh-release.tgz
 
 validator.jar:
-	cd tools/cm_ext && mvn install && cd -
+	cd tools/cm_ext && mvn -q install && cd -
 	ln tools/cm_ext/validator/target/validator.jar .
 
 make_manifest.py:
