@@ -77,7 +77,7 @@ make_manifest.py:
 	ln tools/cm_ext/make_manifest/make_manifest.py
 
 nifi-$(NIFI_VERSION)-bin.tar.gz: nifi-$(NIFI_VERSION)-bin.tar.gz-SHA256
-	wget http://apache.claz.org/nifi/$(NIFI_VERSION)/nifi-$(NIFI_VERSION)-bin.tar.gz
+	wget 'https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=nifi/$(NIFI_VERSION)/$@' -O $@
 	touch $@
 	sha256sum -c $<
 
