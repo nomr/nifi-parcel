@@ -28,7 +28,7 @@ info:
 clean:
 	rm -rf release NIFI-$(VERSION) NIFI-$(VERSION).parcel
 
-release: $(foreach PARCEL,$(PARCELS),%/$(PARCEL)) release/manifest.json
+release: $(foreach PARCEL,$(PARCELS),release/$(PARCEL)) release/manifest.json
 
 %/manifest.json: make_manifest.py
 	mkdir -p $(shell dirname $@)
