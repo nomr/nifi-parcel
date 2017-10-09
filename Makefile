@@ -1,14 +1,17 @@
 
 CSD_VERSION=0.0.1
 
-#DISTROS=el6 el7 trusty wheezy
-DISTROS=el7
-
 TAG:=$(shell git describe --tags | sed -e 's/^v//')
-NIFI_VERSION=$(shell echo $(TAG) | sed -e 's/-.*$$//')
-BUILD_NUMBER=$(shell echo $(TAG) | sed -e 's/^.*-//')
-VERSION:=$(NIFI_VERSION)-$(BUILD_NUMBER)
+TAG_DIST=$(shell echo $(TAG) | sed -r -e 's/.*-([[:digit:]]+)-g.*/\1/')
+TAG_HASH=$(shell echo $(TAG) | sed -r -e 's/^.*(g[0-9a-f]+|$$)/\1/')
+NIFI_VERSION=$(shell echo $(TAG) | sed -r -e 's/\+nifi.*//')
+VERSION=$(TAG)
 
+ifeq ($(TRAVIS), true)
+  DISTROS=el6 el7 sles11 trusty wheezy
+else
+  DISTROS=el7
+endif
 PARCELS=$(foreach DISTRO,$(DISTROS),NIFI-$(VERSION)-$(DISTRO).parcel)
 
 .INTERMEDIATE: %-SHA256
@@ -20,8 +23,9 @@ all: info release
 info:
 	@echo '       Git Tag: $(TAG)'
 	@[ ! -z $(TAG) ]
+	@echo '      Tag dist: $(TAG_DIST)'
+	@echo '      Tag hash: $(TAG_HASH)'
 	@echo '  NiFi version: $(NIFI_VERSION)'
-	@echo '  Build number: $(BUILD_NUMBER)'
 	@echo 'Parcel version: $(VERSION)'
 	@echo '       Parcels: $(PARCELS)'
 
