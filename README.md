@@ -1,8 +1,8 @@
-# nifi-cdh
-nifi-cdh is a CDH5.x parcel for Apache's NiFi system.
+# nifi-parcel
+nifi-parcel is a CDH5.x parcel for Apache's NiFi system.
+[![Build Status](https://travis-ci.org/nomr/nifi-parcel.svg?branch=master)](https://travis-ci.org/nomr/nifi-parcel)
 
 ## Requirements 
-
   - jq
   - Java 7 or higher
   - Maven 3
@@ -10,8 +10,10 @@ nifi-cdh is a CDH5.x parcel for Apache's NiFi system.
   - ImageMagick
 
 ## Build Instructions
+  1. Run `make`
 
-  1. Create a new tag
-  2. Run `make`
+## Release Instructions
 
-## Travis
+  1. Tag a release, the format is 'v<nifi version>+nifi<parcel version>'.
+  2. Push it to github.
+  3. Wait for Travis to build it.
