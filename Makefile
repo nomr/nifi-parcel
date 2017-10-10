@@ -54,6 +54,7 @@ NIFI-$(VERSION): nifi-$(NIFI_VERSION)-bin.tar.gz
 	rm -rf $@
 	tar -zxf $<
 	mv nifi-$(NIFI_VERSION) $@
+	find $@/lib -type f -exec chmod o+r {} \;
 
 # Remote dependencies
 validator.jar:
