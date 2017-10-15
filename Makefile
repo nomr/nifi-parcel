@@ -50,11 +50,11 @@ NIFI-$(VERSION)/meta: NIFI-$(VERSION) meta validator.jar
 	cat meta/parcel.json | jq ".version=\"$(VERSION)\"" > $@/parcel.json
 	java -jar validator.jar -p $@/parcel.json || (rm -rf $@ && false)
 
-NIFI-$(VERSION): nifi-$(NIFI_VERSION)-bin.tar.gz
+NIFI-$(VERSION): nifi-$(NIFI_VERSION) nifi-toolkit-$(NIFI_VERSION)
 	rm -rf $@
-	tar -zxf $<
-	mv nifi-$(NIFI_VERSION) $@
-	find $@/lib -type f -exec chmod o+r {} \;
+	mkdir -p $@/lib
+	mv nifi-$(NIFI_VERSION) $@/lib/nifi
+	mv nifi-toolkit-$(NIFI_VERSION) $@/lib/nifi-toolkit
 
 # Remote dependencies
 validator.jar:
@@ -69,6 +69,16 @@ nifi-$(NIFI_VERSION)-bin.tar.gz: nifi-$(NIFI_VERSION)-bin.tar.gz-SHA256
 	touch $@
 	sha256sum -c $<
 
+nifi-toolkit-$(NIFI_VERSION)-bin.tar.gz: nifi-toolkit-$(NIFI_VERSION)-bin.tar.gz-SHA256
+	wget 'https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=nifi/$(NIFI_VERSION)/$@' -O $@
+	touch $@
+	sha256sum -c $<
+
+
 # Implicit rules
 %-SHA256: SHA256SUMS
 	grep $(subst -SHA256,,$@) SHA256SUMS > $@
+
+%: %-bin.tar.gz
+	tar -zxvf $<
+	find $@/lib -type f -exec chmod o+r {} \;
