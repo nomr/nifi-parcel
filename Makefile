@@ -55,6 +55,8 @@ NIFI-$(VERSION): nifi-$(NIFI_VERSION) nifi-toolkit-$(NIFI_VERSION)
 	mkdir -p $@/lib
 	mv nifi-$(NIFI_VERSION) $@/lib/nifi
 	mv nifi-toolkit-$(NIFI_VERSION) $@/lib/nifi-toolkit
+	find $@/lib/nifi-toolkit/bin -type f -exec chmod 755 {} \;
+	find $@/lib/nifi-toolkit/classpath -type f -exec chmod 644 {} \;
 
 # Remote dependencies
 validator.jar:

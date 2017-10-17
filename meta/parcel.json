@@ -24,7 +24,7 @@
   "users": {
     "nifi": {
       "longname": "Apache NiFi",
-      "home": "/var/run/nifi",
+      "home": "/var/lib/nifi",
       "shell": "/bin/bash",
       "extra_groups": [ ]
     }
