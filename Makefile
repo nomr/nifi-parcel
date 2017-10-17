@@ -5,7 +5,7 @@ NIFI_VERSION=$(shell echo $(TAG) | sed -r -e 's/\+nifi.*//')
 VERSION=$(subst +,-,$(TAG))
 
 ifeq ($(TRAVIS), true)
-  DISTROS=el6 el7 sles11 trusty wheezy
+  DISTROS=el7
 else
   DISTROS=el7
 endif
