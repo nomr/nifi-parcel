@@ -30,11 +30,13 @@
   "components": [
     {
       "name": "nifi",
-      "version": "1.4.0"
+      "version": "1.4.0",
+      "pkg_version": "1.4.0"
     },
     {
       "name": "nifi-toolkit",
-      "version": "1.4.0"
+      "version": "1.4.0",
+      "pkg_version": "1.4.0"
     }
   ],
 
