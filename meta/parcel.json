@@ -8,7 +8,8 @@
   "conflicts": "",
 
   "provides": [
-    "nifi"
+    "nifi",
+    "nifi-toolkit"
   ],
 
   "scripts": {
@@ -16,15 +17,37 @@
   },
 
   "packages": [
+    {
+      "name": "nifi",
+      "version": "1.4.0"
+    },
+    {
+      "name": "nifi-toolkit",
+      "version": "1.4.0"
+    }
   ],
 
   "components": [
+    {
+      "name": "nifi",
+      "version": "1.4.0"
+    },
+    {
+      "name": "nifi-toolkit",
+      "version": "1.4.0"
+    }
   ],
 
   "users": {
     "nifi": {
       "longname": "Apache NiFi",
       "home": "/var/lib/nifi",
+      "shell": "/bin/bash",
+      "extra_groups": [ ]
+    },
+    "nifi-ca": {
+      "longname": "Apache NiFi CA",
+      "home": "/var/lib/nifi-ca",
       "shell": "/bin/bash",
       "extra_groups": [ ]
     }
