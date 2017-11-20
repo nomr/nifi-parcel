@@ -56,6 +56,7 @@ NIFI-$(VERSION): nifi-$(NIFI_VERSION) nifi-toolkit-$(NIFI_VERSION) jq-$(JQ_VERSI
 	mkdir -p $@/lib $@/bin
 	mv jq-$(JQ_VERSION)-linux64 $@/bin/jq
 	find $@/bin -type f -exec chmod 755 {} \;
+	cp -avf xslt $@/lib/nifi-xslt
 	mv nifi-$(NIFI_VERSION) $@/lib/nifi
 	mv nifi-toolkit-$(NIFI_VERSION) $@/lib/nifi-toolkit
 	find $@/lib/nifi-toolkit/bin -type f -exec chmod 755 {} \;
