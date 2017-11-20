@@ -2,6 +2,7 @@ TAG:=$(shell git describe --tags | sed -e 's/^v//')
 TAG_DIST=$(shell echo $(TAG) | sed -r -e 's/.*-([[:digit:]]+)-g.*/\1/')
 TAG_HASH=$(shell echo $(TAG) | sed -r -e 's/^.*(g[0-9a-f]+|$$)/\1/')
 NIFI_VERSION=$(shell echo $(TAG) | sed -r -e 's/\+nifi.*//')
+JQ_VERSION=1.5
 VERSION=$(subst +,-,$(TAG))
 
 ifeq ($(TRAVIS), true)
@@ -50,9 +51,11 @@ NIFI-$(VERSION)/meta: NIFI-$(VERSION) meta validator.jar
 	cat meta/parcel.json | jq ".version=\"$(VERSION)\"" > $@/parcel.json
 	java -jar validator.jar -p $@/parcel.json || (rm -rf $@ && false)
 
-NIFI-$(VERSION): nifi-$(NIFI_VERSION) nifi-toolkit-$(NIFI_VERSION)
+NIFI-$(VERSION): nifi-$(NIFI_VERSION) nifi-toolkit-$(NIFI_VERSION) jq-$(JQ_VERSION)-linux64
 	rm -rf $@
-	mkdir -p $@/lib
+	mkdir -p $@/lib $@/bin
+	mv jq-$(JQ_VERSION)-linux64 $@/bin/jq
+	find $@/bin -type f -exec chmod 755 {} \;
 	mv nifi-$(NIFI_VERSION) $@/lib/nifi
 	mv nifi-toolkit-$(NIFI_VERSION) $@/lib/nifi-toolkit
 	find $@/lib/nifi-toolkit/bin -type f -exec chmod 755 {} \;
@@ -65,6 +68,11 @@ validator.jar:
 
 make_manifest.py:
 	ln tools/cm_ext/make_manifest/make_manifest.py
+
+jq-$(JQ_VERSION)-linux64: jq-$(JQ_VERSION)-SHA256
+	wget 'https://github.com/stedolan/jq/releases/download/jq-$(JQ_VERSION)/jq-linux64' -O $@
+	touch $@
+	sha256sum -c $<
 
 nifi-$(NIFI_VERSION)-bin.tar.gz: nifi-$(NIFI_VERSION)-bin.tar.gz-SHA256
 	wget 'https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=nifi/$(NIFI_VERSION)/$@' -O $@

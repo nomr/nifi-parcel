@@ -18,6 +18,10 @@
 
   "packages": [
     {
+      "name": "jq",
+      "version": "1.5"
+    },
+    {
       "name": "nifi",
       "version": "1.4.0"
     },
@@ -28,6 +32,10 @@
   ],
 
   "components": [
+    {
+      "name": "jq",
+      "version": "1.5"
+    },
     {
       "name": "nifi",
       "version": "1.4.0",
